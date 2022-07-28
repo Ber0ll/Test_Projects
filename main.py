@@ -1,14 +1,14 @@
 # Stage-1 Data download (done)
 # Stage-2 Cleaning data (done)
 # Stage-3 Crypto fear and greed index graph (done)
-# Stage-4 Data set saving mechanism
-# Stage-5 Polkadot and ETH pair value comparrision
+# Stage-4 Data set saving mechanism (done)
 # Stage-6 GUI
 
 import json
 import requests
 from matplotlib import pyplot as plt
 from datetime import datetime
+import pandas as pd
 
 
 # Function definition
@@ -16,14 +16,17 @@ from datetime import datetime
 # Download data form API
 def download_data():
     data_set = requests.get("https://api.alternative.me/fng/?limit=30&format=json&date_format=world")
-    print(data_set.status_code)
+
+    if data_set.status_code == 200:
+        print("Data downloaded successfully")
+    else:
+        print("Server error")
     data = data_set.json()
     return data
 
 
 # cleaning data set from useless information
 def cleaning_data(data_set):
-    print(type(data_set))
     value = data_set['data']  # obtaining the main set of data
 
     # creating new dictionary with most important information
@@ -64,12 +67,13 @@ def checking_function(data_to_check):
     else:
         print("New records not found!")
 
+
 def sorting_function():
-    #opening file
+    # opening file
     with open("data_set.json", "r") as arch_data:
         unsorted_data = json.load(arch_data)
         arch_data.close()
-    #sorting
+        # sorting
         sorted_data = dict(sorted(unsorted_data.items(), key=lambda x: datetime.strptime(x[0], "%d-%m-%Y")))
 
     with open("data_set.json", "w") as arch_data:
@@ -77,6 +81,28 @@ def sorting_function():
     arch_data.close()
     print("Sorted data saved")
     return sorted_data
+
+
+def plotting_function(data_to_plot):
+    a = [""]
+    b = [""]
+    for x, y in data_to_plot.items():
+        a.append(str(x))
+        b.append(int(y))
+
+    a.pop(0)
+    b.pop(0)
+
+    plt.plot(a, b)
+    plt.title("Fear and Greed index in last month", loc='left')
+    plt.xticks(rotation=90, fontsize=8)
+    plt.tight_layout()
+    plt.show()
+
+
+def pandas_table_test(data_to_show):
+    print(pd.DataFrame.from_dict(data_to_show, orient='index'))
+
 
 # Program sequence
 
@@ -90,20 +116,12 @@ print(type(data_base))
 # 3.Saving Data
 checking_function(data_base)
 
-#4. Sorting Data
-data_to_plot = sorting_function()
-print(data_to_plot)
+# 4. Sorting Data
+sorted_data = sorting_function()
 
-a = [""]
-b = [""]
-for x, y in data_to_plot.items():
-    a.append(str(x))
-    b.append(int(y))
+# 5. Plotting function
+pandas_table_test(sorted_data)
 
-a.pop(0)
-b.pop(0)
+plotting_function(sorted_data)
 
-plt.plot(a, b)
-plt.title("Fear and Greed index in las mounth", loc='left')
-plt.xticks(rotation=90, fontsize=8)
-plt.show()
+
