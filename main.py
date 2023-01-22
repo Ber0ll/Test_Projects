@@ -10,12 +10,11 @@ from matplotlib import pyplot as plt
 from datetime import datetime
 import pandas as pd
 
-
-# Function definition
-
 # Download data form API
-def download_data():
-    data_set = requests.get("https://api.alternative.me/fng/?limit=30&format=json&date_format=world")
+def download_data(number_of_days):
+
+    request_sting = "https://api.alternative.me/fng/?limit=%s&format=json&date_format=world" % number_of_days
+    data_set = requests.get(request_sting)
 
     if data_set.status_code == 200:
         print("Data downloaded successfully")
@@ -23,7 +22,6 @@ def download_data():
         print("Server error")
     data = data_set.json()
     return data
-
 
 # cleaning data set from useless information
 def cleaning_data(data_set):
@@ -35,7 +33,6 @@ def cleaning_data(data_set):
     for i in range(len(value) - 1, -1, -1):
         data_dic[data_set['data'][i]['timestamp']] = data_set['data'][i]['value']
     return data_dic
-
 
 # saving data
 def checking_function(data_to_check):
@@ -83,7 +80,7 @@ def sorting_function():
     return sorted_data
 
 
-def plotting_function(data_to_plot):
+def plotting_function(data_to_plot,number_of_days):
     a = [""]
     b = [""]
     for x, y in data_to_plot.items():
@@ -94,9 +91,10 @@ def plotting_function(data_to_plot):
     b.pop(0)
 
     plt.plot(a, b)
-    plt.title("Fear and Greed index in last month", loc='left')
+    plt.title("Fear and Greed index in last %s days" %number_of_days, loc='left')
     plt.xticks(rotation=90, fontsize=8)
     plt.tight_layout()
+    plt.ylim(0, 100)
     plt.show()
 
 
@@ -106,10 +104,15 @@ def pandas_table_test(data_to_show):
 
 # Program sequence
 
-# 1.Download Data
-downloaded_data = download_data()
+#0 Specific values
 
-# 2.Cleaning_Data
+print("How many days would you like to see?")
+days = input("The numbers of days: ")
+
+# 1.Download Data
+downloaded_data = download_data(days)
+
+# 2.Cleaning Data
 data_base = cleaning_data(downloaded_data)
 print(type(data_base))
 
@@ -122,6 +125,6 @@ sorted_data = sorting_function()
 # 5. Plotting function
 pandas_table_test(sorted_data)
 
-plotting_function(sorted_data)
+plotting_function(sorted_data,days)
 
 
